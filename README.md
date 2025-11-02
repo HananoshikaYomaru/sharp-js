@@ -16,6 +16,16 @@ A Sharp-compatible pure JavaScript image processing library using [ImageScript](
 
 ## Installation
 
+### From npm
+```bash
+npm install sharp-js
+# or
+pnpm add sharp-js
+# or
+yarn add sharp-js
+```
+
+### From GitHub Packages
 ```bash
 npm install @yomaru/sharp-js
 # or
