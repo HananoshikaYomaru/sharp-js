@@ -1,0 +1,52 @@
+{
+	"name": "sharp-js",
+	"version": "1.0.15",
+	"description": "Sharp-compatible wrapper using ImageScript",
+	"main": "dist/src/index.js",
+	"module": "dist/src/index.js",
+	"types": "dist/src/index.d.ts",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com",
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hananoshikayomaru/sharp-js.git"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"import": "./dist/src/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc && ts-add-js-extension --dir=dist",
+		"prepublishOnly": "pnpm build",
+		"test": "vitest",
+		"typecheck": "tsc --noEmit",
+		"prepare": "husky",
+		"lint": "biome check"
+	},
+	"dependencies": {
+		"file-type": "^21.0.0",
+		"imagescript": "^1.3.1",
+		"sanitize-filename": "^1.6.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.2.3",
+		"@types/node": "^22.18.1",
+		"esbuild": "^0.25.9",
+		"husky": "^9.1.7",
+		"openapi-types": "^12.1.3",
+		"sharp": "^0.34.4",
+		"ts-add-js-extension": "^1.6.6",
+		"tsx": "^4.20.5",
+		"type-fest": "^4.41.0",
+		"typescript": "^5.9.3",
+		"vitest": "^3.2.4"
+	}
+}

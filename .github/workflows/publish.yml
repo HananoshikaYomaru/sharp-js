@@ -1,0 +1,48 @@
+name: Publish Package
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@yomaru"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile, --strict-peer-dependencies]
+            - args: [--global, typescript]
+        env:
+          # we cannot use GITHUB_TOKEN here because we try to access company resources which is outside the scope of this repo
+          # this must be a classic token with read:packages and write:packages permissions
+          GITHUB_TOKEN: ${{ secrets.ALL_2 }}
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to GitHub Packages
+        # Added condition to only publish when a tag is pushed
+        # if: startsWith(github.ref, 'refs/tags/')
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ALL_2 }}
