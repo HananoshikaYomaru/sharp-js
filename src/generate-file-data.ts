@@ -330,7 +330,7 @@ export const generateFileData = async <T>({
 
 			if (fileHasAdjustments) {
 				if (resizeOptions) {
-					sharpFile = await sharpFile.resize(resizeOptions);
+					sharpFile = sharpFile.resize(resizeOptions);
 				}
 
 				if (formatOptions) {
@@ -427,7 +427,7 @@ export const generateFileData = async <T>({
 			if (resizeOptions && !resizeOptions.withoutEnlargement) {
 				const sharpInstance = typeof sharp === 'function' ? sharp(croppedImage) : sharpFactory(croppedImage);
 				const wrapper = sharpInstance;
-				const resizedWrapper = await wrapper.resize(resizeOptions);
+				const resizedWrapper = wrapper.resize(resizeOptions);
 				const resizedAfterCrop = await resizedWrapper.toBuffer({ resolveWithObject: true });
 
 				if (!('data' in resizedAfterCrop) || !('info' in resizedAfterCrop)) {

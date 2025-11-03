@@ -260,7 +260,7 @@ export async function resizeAndTransformImageSizes({
                 const prioritizeHeight = resizeAspectRatio < originalAspectRatio;
 
                 // Scale the image before extracting from it
-                resized = await resized.resize({
+                resized = resized.resize({
                     fastShrinkOnLoad: false,
                     height: prioritizeHeight ? resizeHeight : undefined,
                     width: prioritizeHeight ? undefined : resizeWidth,
@@ -315,7 +315,7 @@ export async function resizeAndTransformImageSizes({
                     width: resizeWidth!,
                 });
             } else {
-                resized = await resized.resize({
+                resized = resized.resize({
                     width: sanitizedConfig.width,
                     height: sanitizedConfig.height,
                     fit: sanitizedConfig.fit,

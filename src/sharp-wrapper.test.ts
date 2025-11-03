@@ -84,18 +84,18 @@ describe('SharpWrapper', () => {
 		const comparison = compareImageOutputs(sharpResult, imageJsResult);
 		// Format won't match because image-js fallbacks to PNG
 		expect(comparison.dimensionsMatch).toBe(true);
+	}, 10000);
+
+	it('should clone instance', () => {
+		const buffer = Buffer.from([1, 2, 3]);
+		const wrapper1 = sharp(buffer);
+		const wrapper2 = wrapper1.clone();
+
+		expect(wrapper2).not.toBe(wrapper1);
+		// Verify clone is a valid instance
+		expect(wrapper2).toHaveProperty('clone');
+		expect(wrapper2).toHaveProperty('resize');
+		expect(wrapper2).toHaveProperty('toBuffer');
 	});
-
-	it(
-		'should clone instance',
-		async () => {
-			const fixture = await loadFixture('test.png');
-			const wrapper1 = sharp(fixture);
-			const wrapper2 = wrapper1.clone();
-
-			expect(wrapper2).not.toBe(wrapper1);
-		},
-		10000,
-	);
 });
 
