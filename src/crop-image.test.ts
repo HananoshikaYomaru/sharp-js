@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { loadFixture } from './test-utils.js';
 import { cropImage } from './crop-image.js';
 import { createMockRequest } from './test-utils.js';
-import { SharpWrapper } from './sharp-wrapper.js';
+import sharp from './sharp-wrapper.js';
 import type { PayloadFile } from './types.js';
 
 describe('cropImage', () => {
@@ -25,7 +25,7 @@ describe('cropImage', () => {
 			heightInPixels: 200,
 			// @ts-ignore 
 			req,
-			sharp: new SharpWrapper(),
+			sharp: sharp(),
 			widthInPixels: 200,
 		});
 
@@ -53,7 +53,7 @@ describe('cropImage', () => {
 			heightInPixels: 300,
 			// @ts-ignore 
 			req,
-			sharp: new SharpWrapper(),
+			sharp: sharp(),
 			widthInPixels: 300,
 		});
 
@@ -82,7 +82,7 @@ describe('cropImage', () => {
 			heightInPixels: 250,
 			// @ts-ignore
 			req,
-			sharp: new SharpWrapper(),
+			sharp: sharp(),
 			widthInPixels: 250,
 		});
 
@@ -106,7 +106,7 @@ describe('cropImage', () => {
 			const req = createMockRequest(file);
 
 			// Get original dimensions first
-			const wrapper = new SharpWrapper(fixture);
+			const wrapper = sharp(fixture);
 			const metadata = await wrapper.metadata();
 
 			const result = await cropImage({
@@ -116,7 +116,7 @@ describe('cropImage', () => {
 				heightInPixels: metadata.height,
 				// @ts-ignore
 				req,
-				sharp: new SharpWrapper(),
+				sharp: sharp(),
 				widthInPixels: metadata.width,
 			});
 

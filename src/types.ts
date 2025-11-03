@@ -1,5 +1,19 @@
 // Type definitions matching Sharp's API surface
 
+export type SharpInput =
+    | Buffer
+    | ArrayBuffer
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int8Array
+    | Uint16Array
+    | Int16Array
+    | Uint32Array
+    | Int32Array
+    | Float32Array
+    | Float64Array
+    | string;
+
 export interface SharpOptions {
     animated?: boolean;
     autoOrient?: boolean;

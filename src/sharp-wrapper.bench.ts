@@ -1,6 +1,6 @@
 import { bench, describe, beforeAll } from 'vitest';
 import { loadFixture, runWithSharp, runWithImageJs } from './test-utils.js';
-import { SharpWrapper } from './sharp-wrapper.js';
+import sharp from './sharp-wrapper.js';
 import Sharp from 'sharp';
 
 describe('SharpWrapper Performance Benchmarks', async () => {
@@ -71,7 +71,7 @@ describe('SharpWrapper Performance Benchmarks', async () => {
 
         bench('image-js', async () => {
             for (let i = 0; i < 1; i++) {
-                const wrapper = new SharpWrapper(pngFixture);
+                const wrapper = sharp(pngFixture);
                 await wrapper.metadata();
             }
         });
@@ -80,7 +80,7 @@ describe('SharpWrapper Performance Benchmarks', async () => {
     describe('clone instance', () => {
         bench('image-js', () => {
             for (let i = 0; i < 1; i++) {
-                const wrapper1 = new SharpWrapper(pngFixture);
+                const wrapper1 = sharp(pngFixture);
                 wrapper1.clone();
             }
         });

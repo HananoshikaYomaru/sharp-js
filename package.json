@@ -1,6 +1,6 @@
 {
 	"name": "sharp-js",
-	"version": "1.0.17",
+	"version": "1.0.18",
 	"description": "Sharp-compatible wrapper using image-js",
 	"main": "dist/src/index.js",
 	"module": "dist/src/index.js",

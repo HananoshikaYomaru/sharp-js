@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-import { SharpWrapper } from './sharp-wrapper.js';
+import sharpFactory from './sharp-wrapper.js';
+import type { SharpWrapper } from './sharp-wrapper.js';
 import type { OutputInfo } from './types.js';
 import type { PayloadFile } from './types.js';
 
@@ -42,7 +43,7 @@ export const runWithImageJs = async (
 	input: Buffer,
 	operation: (wrapper: SharpWrapper) => SharpWrapper | Promise<SharpWrapper>,
 ): Promise<{ data: Buffer; info: OutputInfo }> => {
-	let wrapper = new SharpWrapper(input);
+	let wrapper = sharpFactory(input);
 	wrapper = await operation(wrapper);
 	const result = await wrapper.toBuffer({ resolveWithObject: true });
 
@@ -141,7 +142,7 @@ export const createMockRequest = (file: PayloadFile): {
 		payloadUploadSizes: {},
 		payload: {
 			config: {
-				sharp: new SharpWrapper(),
+				sharp: sharpFactory(),
 			},
 			logger: {
 				error: (err: unknown) => {

@@ -3,6 +3,7 @@ import type { Image } from 'image-js';
 import sizeOf from 'image-size';
 import type {
     SharpOptions,
+    SharpInput,
     ResizeOptions,
     Region,
     OutputInfo,
@@ -347,3 +348,91 @@ export class SharpWrapper {
     }
 }
 
+/**
+ * Convert SharpInput to Buffer or string for SharpWrapper
+ */
+function normalizeInput(input?: SharpInput | Array<SharpInput>): Buffer | string | undefined {
+    if (input === undefined) {
+        return undefined;
+    }
+
+    // Handle array of inputs - Sharp doesn't support arrays in this context typically,
+    // but we'll take the first element if array is provided
+    if (Array.isArray(input)) {
+        if (input.length === 0) {
+            return undefined;
+        }
+        input = input[0];
+    }
+
+    // String or Buffer can be passed directly
+    if (typeof input === 'string' || Buffer.isBuffer(input)) {
+        return input;
+    }
+
+    // Convert TypedArrays and ArrayBuffer to Buffer
+    if (input instanceof ArrayBuffer) {
+        return Buffer.from(input);
+    }
+
+    // Handle various TypedArray types
+    if (
+        input instanceof Uint8Array ||
+        input instanceof Uint8ClampedArray ||
+        input instanceof Int8Array ||
+        input instanceof Uint16Array ||
+        input instanceof Int16Array ||
+        input instanceof Uint32Array ||
+        input instanceof Int32Array ||
+        input instanceof Float32Array ||
+        input instanceof Float64Array
+    ) {
+        return Buffer.from(input);
+    }
+
+    return undefined;
+}
+
+/**
+ * Factory function matching Sharp's API signature
+ * Can be called without `new` to create SharpWrapper instances
+ */
+function sharp(input?: SharpInput | Array<SharpInput>, options?: SharpOptions): SharpWrapper;
+function sharp(options?: SharpOptions): SharpWrapper;
+function sharp(
+    inputOrOptions?: SharpInput | Array<SharpInput> | SharpOptions,
+    options?: SharpOptions,
+): SharpWrapper {
+    // Handle case: sharp(options) - only options provided
+    if (options === undefined && inputOrOptions !== undefined) {
+        // Check if inputOrOptions looks like SharpOptions (object with SharpOptions properties)
+        if (
+            typeof inputOrOptions === 'object' &&
+            inputOrOptions !== null &&
+            !Buffer.isBuffer(inputOrOptions) &&
+            !(inputOrOptions instanceof ArrayBuffer) &&
+            !(
+                inputOrOptions instanceof Uint8Array ||
+                inputOrOptions instanceof Uint8ClampedArray ||
+                inputOrOptions instanceof Int8Array ||
+                inputOrOptions instanceof Uint16Array ||
+                inputOrOptions instanceof Int16Array ||
+                inputOrOptions instanceof Uint32Array ||
+                inputOrOptions instanceof Int32Array ||
+                inputOrOptions instanceof Float32Array ||
+                inputOrOptions instanceof Float64Array
+            ) &&
+            !Array.isArray(inputOrOptions) &&
+            typeof inputOrOptions !== 'string'
+        ) {
+            // It's likely options, not input
+            return new SharpWrapper(undefined, inputOrOptions as SharpOptions);
+        }
+    }
+
+    // Handle case: sharp(input, options) or sharp(input)
+    const normalizedInput = normalizeInput(inputOrOptions as SharpInput | Array<SharpInput> | undefined);
+    return new SharpWrapper(normalizedInput, options);
+}
+
+export default sharp;
