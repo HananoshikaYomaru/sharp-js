@@ -36,9 +36,9 @@ export const runWithSharp = async (
 };
 
 /**
- * Run operation with ImageScript and return result
+ * Run operation with image-js and return result
  */
-export const runWithImageScript = async (
+export const runWithImageJs = async (
 	input: Buffer,
 	operation: (wrapper: SharpWrapper) => SharpWrapper | Promise<SharpWrapper>,
 ): Promise<{ data: Buffer; info: OutputInfo }> => {
@@ -61,7 +61,7 @@ export const runWithImageScript = async (
  */
 export const compareImageOutputs = (
 	sharpResult: { data: Buffer; info: OutputInfo },
-	imageScriptResult: { data: Buffer; info: OutputInfo },
+	imageJsResult: { data: Buffer; info: OutputInfo },
 	tolerance?: { sizeTolerance?: number },
 ): {
 	dimensionsMatch: boolean;
@@ -69,14 +69,14 @@ export const compareImageOutputs = (
 	formatMatch: boolean;
 } => {
 	const dimensionsMatch =
-		sharpResult.info.width === imageScriptResult.info.width &&
-		sharpResult.info.height === imageScriptResult.info.height;
+		sharpResult.info.width === imageJsResult.info.width &&
+		sharpResult.info.height === imageJsResult.info.height;
 
 	const sizeTolerance = tolerance?.sizeTolerance || 0.2; // 20% tolerance for compression differences
-	const sizeDiff = Math.abs(sharpResult.info.size - imageScriptResult.info.size);
+	const sizeDiff = Math.abs(sharpResult.info.size - imageJsResult.info.size);
 	const sizeComparable = sizeDiff / sharpResult.info.size < sizeTolerance;
 
-	const formatMatch = sharpResult.info.format === imageScriptResult.info.format;
+	const formatMatch = sharpResult.info.format === imageJsResult.info.format;
 
 	return {
 		dimensionsMatch,
@@ -90,18 +90,18 @@ export const compareImageOutputs = (
  */
 export const compareBuffers = (
 	sharpBuffer: Buffer,
-	imageScriptBuffer: Buffer,
+	imageJsBuffer: Buffer,
 	tolerance: number = 0.1,
 ): boolean => {
 	// Simple size comparison first
-	if (sharpBuffer.length !== imageScriptBuffer.length) {
+	if (sharpBuffer.length !== imageJsBuffer.length) {
 		return false;
 	}
 
 	// For exact matches, check byte-by-byte
 	// For tolerance, we'd need to decode and compare pixels
 	// This is a simplified version
-	return sharpBuffer.equals(imageScriptBuffer);
+	return sharpBuffer.equals(imageJsBuffer);
 };
 
 /**
@@ -109,16 +109,16 @@ export const compareBuffers = (
  */
 export const compareMetadata = (
 	sharpMetadata: Record<string, unknown>,
-	imageScriptMetadata: Record<string, unknown>,
+	imageJsMetadata: Record<string, unknown>,
 ): {
 	widthMatch: boolean;
 	heightMatch: boolean;
 	channelsMatch: boolean;
 } => {
 	return {
-		widthMatch: sharpMetadata.width === imageScriptMetadata.width,
-		heightMatch: sharpMetadata.height === imageScriptMetadata.height,
-		channelsMatch: sharpMetadata.channels === imageScriptMetadata.channels,
+		widthMatch: sharpMetadata.width === imageJsMetadata.width,
+		heightMatch: sharpMetadata.height === imageJsMetadata.height,
+		channelsMatch: sharpMetadata.channels === imageJsMetadata.channels,
 	};
 };
 

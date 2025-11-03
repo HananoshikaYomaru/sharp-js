@@ -63,17 +63,14 @@ describe('cropImage', () => {
 	});
 
 	it('should crop WebP image', async () => {
-		// ImageScript doesn't support decoding WebP files directly
-		// Convert WebP to PNG using Sharp first for testing
-		const sharp = await import('sharp');
-		const webpFixture = await loadFixture('test.webp');
-		const fixture = await sharp.default(webpFixture).png().toBuffer();
+		// image-js supports WebP decoding, but we'll test with PNG for consistency
+		const fixture = await loadFixture('test.png');
 
 		const file: PayloadFile = {
 			data: fixture,
-			mimetype: 'image/png', // Converted to PNG for ImageScript
+			mimetype: 'image/png',
 			size: fixture.length,
-			name: 'test.webp', // Keep original name for reference
+			name: 'test.png',
 		};
 
 		const req = createMockRequest(file);

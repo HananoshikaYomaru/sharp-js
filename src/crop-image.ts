@@ -41,7 +41,7 @@ export async function cropImage({
 			let adjustedHeight = originalHeight;
 
 			if (fileIsAnimatedType) {
-				// ImageScript has limited animated support
+				// image-js has limited animated support
 				// For now, we'll treat animated images as single frames
 				const wrapper = new SharpWrapper(file.tempFilePath ? await readFile(file.tempFilePath!) : file.data);
 				const animatedMetadata = await wrapper.metadata();
@@ -71,7 +71,7 @@ export async function cropImage({
 
 		let cropped = new SharpWrapper(input);
 		if (fileIsAnimatedType) {
-			// Note: ImageScript has limited animated support
+			// Note: image-js has limited animated support
 			// This may only process the first frame
 		}
 

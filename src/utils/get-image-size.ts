@@ -1,4 +1,4 @@
-import { Image } from 'imagescript';
+import { decode } from 'image-js';
 import type { ProbedImageSize, PayloadFile } from '../types.js';
 
 /**
@@ -6,7 +6,7 @@ import type { ProbedImageSize, PayloadFile } from '../types.js';
  */
 export const getImageSize = async (file: PayloadFile): Promise<ProbedImageSize> => {
     try {
-        const image = await Image.decode(file.data);
+        const image = decode(file.data);
         return {
             width: image.width,
             height: image.height,

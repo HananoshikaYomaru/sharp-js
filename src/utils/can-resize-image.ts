@@ -1,6 +1,6 @@
 /**
  * Check if image format supports resizing
- * ImageScript supports: PNG, JPEG, WebP
+ * image-js supports: PNG, JPEG (WebP decoding only, encoding fallback to PNG)
  */
 export const canResizeImage = (mimetype: string): boolean => {
     const supportedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];

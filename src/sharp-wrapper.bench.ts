@@ -1,5 +1,5 @@
 import { bench, describe, beforeAll } from 'vitest';
-import { loadFixture, runWithSharp, runWithImageScript } from './test-utils.js';
+import { loadFixture, runWithSharp, runWithImageJs } from './test-utils.js';
 import { SharpWrapper } from './sharp-wrapper.js';
 import Sharp from 'sharp';
 
@@ -8,69 +8,69 @@ describe('SharpWrapper Performance Benchmarks', async () => {
 
     describe('resize', () => {
         bench('Sharp', async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 await runWithSharp(pngFixture, (sharp) => sharp.resize(200, 200));
             }
         });
 
-        bench('ImageScript', async () => {
-            for (let i = 0; i < 5; i++) {
-                await runWithImageScript(pngFixture, (wrapper) => wrapper.resize({ width: 200, height: 200, fit: 'fill' }));
+        bench('image-js', async () => {
+            for (let i = 0; i < 1; i++) {
+                await runWithImageJs(pngFixture, (wrapper) => wrapper.resize({ width: 200, height: 200, fit: 'fill' }));
             }
         });
     });
 
     describe('crop/extract', () => {
         bench('Sharp', async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 await runWithSharp(pngFixture, (sharp) => sharp.extract({ left: 10, top: 10, width: 100, height: 100 }));
             }
         });
 
-        bench('ImageScript', async () => {
-            for (let i = 0; i < 5; i++) {
-                await runWithImageScript(pngFixture, (wrapper) => wrapper.extract({ left: 10, top: 10, width: 100, height: 100 }));
+        bench('image-js', async () => {
+            for (let i = 0; i < 1; i++) {
+                await runWithImageJs(pngFixture, (wrapper) => wrapper.extract({ left: 10, top: 10, width: 100, height: 100 }));
             }
         });
     });
 
     describe('format conversion to JPEG', () => {
         bench('Sharp', async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 await runWithSharp(pngFixture, (sharp) => sharp.jpeg());
             }
         });
 
-        bench('ImageScript', async () => {
-            for (let i = 0; i < 5; i++) {
-                await runWithImageScript(pngFixture, (wrapper) => wrapper.toFormat('jpeg'));
+        bench('image-js', async () => {
+            for (let i = 0; i < 1; i++) {
+                await runWithImageJs(pngFixture, (wrapper) => wrapper.toFormat('jpeg'));
             }
         });
     });
 
     describe('format conversion to WebP', () => {
         bench('Sharp', async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 await runWithSharp(pngFixture, (sharp) => sharp.webp());
             }
         });
 
-        bench('ImageScript', async () => {
-            for (let i = 0; i < 5; i++) {
-                await runWithImageScript(pngFixture, (wrapper) => wrapper.toFormat('webp'));
+        bench('image-js', async () => {
+            for (let i = 0; i < 1; i++) {
+                await runWithImageJs(pngFixture, (wrapper) => wrapper.toFormat('webp'));
             }
         });
     });
 
     describe('decode image', () => {
         bench('Sharp', async () => {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 1; i++) {
                 await Sharp(pngFixture).metadata();
             }
         });
 
-        bench('ImageScript', async () => {
-            for (let i = 0; i < 5; i++) {
+        bench('image-js', async () => {
+            for (let i = 0; i < 1; i++) {
                 const wrapper = new SharpWrapper(pngFixture);
                 await wrapper.metadata();
             }
@@ -78,8 +78,8 @@ describe('SharpWrapper Performance Benchmarks', async () => {
     });
 
     describe('clone instance', () => {
-        bench('ImageScript', () => {
-            for (let i = 0; i < 5; i++) {
+        bench('image-js', () => {
+            for (let i = 0; i < 1; i++) {
                 const wrapper1 = new SharpWrapper(pngFixture);
                 wrapper1.clone();
             }

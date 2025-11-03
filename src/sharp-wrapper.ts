@@ -1,4 +1,5 @@
-import { Image } from 'imagescript';
+import { decode, resize, crop, encodePng, encodeJpeg } from 'image-js';
+import type { Image } from 'image-js';
 import sizeOf from 'image-size';
 import type {
     SharpOptions,
@@ -11,7 +12,7 @@ import type {
 } from './types.js';
 import { readFile } from "fs/promises";
 /**
- * Sharp-compatible wrapper using ImageScript
+ * Sharp-compatible wrapper using image-js
  */
 export class SharpWrapper {
     private image: Image | null = null;
@@ -37,9 +38,8 @@ export class SharpWrapper {
         const filePath = (this as unknown as { _filePath?: string })._filePath;
         const cloned = new SharpWrapper(filePath ? filePath : this.inputBuffer ?? undefined, this.options);
         if (this.image) {
-            // Clone the image by decoding again
-            // Note: ImageScript doesn't have a clone method, so we'll decode on use
-            cloned.image = null;
+            // Clone the image using image-js clone method
+            cloned.image = this.image.clone();
         }
         cloned.format = this.format;
         cloned.encodeOptions = { ...this.encodeOptions };
@@ -66,18 +66,19 @@ export class SharpWrapper {
             throw new Error('No input provided');
         }
 
-        this.image = await Image.decode(buffer);
+        // image-js decode is synchronous, but we need to handle it as async for compatibility
+        this.image = decode(buffer);
         return this.image;
     }
 
     /**
      * Rotate image by angle or auto-orient based on EXIF
-     * Note: ImageScript has limited rotation support
+     * Note: image-js has limited EXIF rotation support
      */
     rotate(angle?: number, options?: RotateOptions): SharpWrapper {
-        // ImageScript doesn't have direct rotation, we'll handle this in resize/extract
+        // image-js doesn't have direct EXIF rotation support
         // For now, just return self for chaining
-        // EXIF auto-orientation is not supported by ImageScript
+        // EXIF auto-orientation is not supported by image-js
         return this;
     }
 
@@ -86,7 +87,7 @@ export class SharpWrapper {
      * Alias for rotate() without angle
      */
     autoOrient(): SharpWrapper {
-        // EXIF orientation not supported by ImageScript
+        // EXIF orientation not supported by image-js
         return this;
     }
 
@@ -188,8 +189,8 @@ export class SharpWrapper {
             finalHeight = image.height;
         }
 
-        // Perform resize
-        this.image = image.resize(finalWidth, finalHeight);
+        // Perform resize using image-js
+        this.image = resize(image, { width: finalWidth, height: finalHeight });
 
         return this;
     }
@@ -199,7 +200,7 @@ export class SharpWrapper {
      */
     extract(region: Region): SharpWrapper {
         // We need to ensure image is loaded
-        // Since this is synchronous in Sharp but async in ImageScript, we'll defer
+        // Since this is synchronous in Sharp but async in image-js, we'll defer
         // This will be handled in toBuffer
         (this as unknown as { _extractRegion?: Region })._extractRegion = region;
         return this;
@@ -207,10 +208,10 @@ export class SharpWrapper {
 
     /**
      * Trim edges
-     * Note: ImageScript doesn't have trim, so this is a no-op for now
+     * Note: image-js doesn't have trim, so this is a no-op for now
      */
     trim(options?: TrimOptions): SharpWrapper {
-        // ImageScript doesn't support trim
+        // image-js doesn't support trim
         // Store options for potential future implementation
         (this as unknown as { _trimOptions?: TrimOptions })._trimOptions = options;
         return this;
@@ -265,17 +266,19 @@ export class SharpWrapper {
                 };
             }
         } catch (error) {
-            // If image-size fails, fallback to ImageScript (should be rare)
+            // If image-size fails, fallback to image-js (should be rare)
             // This can happen with unsupported formats or corrupted headers
         }
 
-        // Fallback to ImageScript full decode only if header parsing fails
+        // Fallback to image-js full decode only if header parsing fails
         const image = await this.getImage();
+        // Ensure channels is in the valid range (1-4)
+        const channels = Math.min(4, Math.max(1, image.channels)) as 1 | 2 | 3 | 4;
         return {
             width: image.width,
             height: image.height,
-            channels: 4, // RGBA
-            hasAlpha: true,
+            channels,
+            hasAlpha: image.alpha,
             format: this.format,
         };
     }
@@ -290,7 +293,16 @@ export class SharpWrapper {
         const extractRegion = (this as unknown as { _extractRegion?: Region })._extractRegion;
         if (extractRegion) {
             try {
-                image = image.crop(extractRegion.left, extractRegion.top, extractRegion.width, extractRegion.height);
+                // image-js crop uses { origin: { row, column }, width, height }
+                // row = top (Y coordinate), column = left (X coordinate)
+                image = crop(image, {
+                    origin: {
+                        row: extractRegion.top,
+                        column: extractRegion.left,
+                    },
+                    width: extractRegion.width,
+                    height: extractRegion.height,
+                });
             } catch (error) {
                 throw new Error(`Failed to extract region: ${error instanceof Error ? error.message : String(error)}`);
             }
@@ -303,17 +315,16 @@ export class SharpWrapper {
 
         if (this.format === 'jpeg') {
             const qualityNum = Math.max(1, Math.min(100, (this.encodeOptions.quality as number) ?? 80));
-            // ImageScript JPEGQuality is 1-100
-            encoded = await image.encodeJPEG(qualityNum as never);
+            // image-js encodeJpeg quality is 1-100
+            encoded = encodeJpeg(image, { quality: qualityNum });
             mimeType = 'image/jpeg';
         } else if (this.format === 'webp') {
-            const qualityNum = Math.max(0, Math.min(100, (this.encodeOptions.quality as number) ?? 80));
-            // ImageScript WEBPQuality is 0-100 or null
-            encoded = await image.encodeWEBP(qualityNum === 100 ? null : (qualityNum as never));
-            mimeType = 'image/webp';
+            // image-js doesn't support WebP encoding, fallback to PNG
+            encoded = encodePng(image);
+            mimeType = 'image/png';
         } else {
-            // PNG (default) - uses encode() method
-            encoded = await image.encode();
+            // PNG (default)
+            encoded = encodePng(image);
             mimeType = 'image/png';
         }
 

@@ -1,6 +1,6 @@
 # sharp-js
 
-A Sharp-compatible pure JavaScript image processing library using [ImageScript](https://github.com/matmen/ImageScript). This library provides a drop-in replacement for Sharp's API, making it perfect for environments where native dependencies aren't feasible (e.g., edge runtimes, serverless functions, or pure JavaScript environments).
+A Sharp-compatible pure JavaScript image processing library using [image-js](https://github.com/image-js/image-js). This library provides a drop-in replacement for Sharp's API, making it perfect for environments where native dependencies aren't feasible (e.g., edge runtimes, serverless functions, or pure JavaScript environments).
 
 ## Features
 
@@ -9,7 +9,7 @@ A Sharp-compatible pure JavaScript image processing library using [ImageScript](
 - **Image Processing Operations**:
   - Resize with multiple fit modes (cover, contain, fill, inside, outside)
   - Crop/extract regions
-  - Format conversion (PNG, JPEG, WebP)
+  - Format conversion (PNG, JPEG; WebP decoding only, encoding fallback to PNG)
   - Image manipulation utilities
 - **Multi-size Generation** - Generate multiple image sizes with focal point support
 - **TypeScript Support** - Full type definitions included
@@ -109,7 +109,7 @@ sharp(buffer).toFormat('jpeg', { quality: 80 });
 
 Compared to Sharp, this library has some limitations:
 
-1. **WebP Decoding** - ImageScript cannot decode WebP files directly. You'll need to convert WebP to PNG/JPEG first using Sharp or another tool for input processing.
+1. **WebP Encoding** - image-js cannot encode WebP files. WebP encoding requests will fallback to PNG format. WebP decoding is supported.
 
 2. **EXIF Auto-orientation** - Automatic EXIF orientation correction is not supported.
 
@@ -126,13 +126,13 @@ Compared to Sharp, this library has some limitations:
 The library includes cross-testing utilities to verify compatibility with Sharp:
 
 ```typescript
-import { loadFixture, runWithSharp, runWithImageScript, compareImageOutputs } from 'sharp-js/test-utils';
+import { loadFixture, runWithSharp, runWithImageJs, compareImageOutputs } from 'sharp-js/test-utils';
 
 const fixture = await loadFixture('test.png');
 const sharpResult = await runWithSharp(fixture, (sharp) => sharp.resize(200, 200));
-const imageScriptResult = await runWithImageScript(fixture, (wrapper) => wrapper.resize({ width: 200, height: 200 }));
+const imageJsResult = await runWithImageJs(fixture, (wrapper) => wrapper.resize({ width: 200, height: 200 }));
 
-const comparison = compareImageOutputs(sharpResult, imageScriptResult);
+const comparison = compareImageOutputs(sharpResult, imageJsResult);
 // comparison.dimensionsMatch, comparison.sizeComparable, comparison.formatMatch
 ```
 
@@ -170,47 +170,47 @@ pnpm test
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > resize 9978ms
      name             hz     min     max    mean     p75     p99    p995    p999     rme  samples
    · Sharp        3.7496  264.06  273.31  266.69  267.30  273.31  273.31  273.31  ±0.72%       10
-   · ImageScript  2.5337  391.67  397.87  394.69  396.13  397.87  397.87  397.87  ±0.34%       10
+   · image-js     2.5337  391.67  397.87  394.69  396.13  397.87  397.87  397.87  ±0.34%       10
 
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > crop/extract 5985ms
      name              hz      min      max     mean      p75      p99     p995     p999     rme  samples
    · Sharp        86.8452  11.2835  11.8265  11.5147  11.5745  11.8265  11.8265  11.8265  ±0.32%       44
-   · ImageScript   2.8017   352.80   359.75   356.92   358.74   359.75   359.75   359.75  ±0.40%       10
+   · image-js      2.8017   352.80   359.75   356.92   358.74   359.75   359.75   359.75  ±0.40%       10
 
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to JPEG 13819ms
      name             hz     min     max    mean     p75     p99    p995    p999     rme  samples
    · Sharp        3.1068  313.74  336.65  321.88  324.58  336.65  336.65  336.65  ±1.42%       10
-   · ImageScript  1.6641  594.84  609.18  600.92  606.41  609.18  609.18  609.18  ±0.57%       10
+   · image-js     1.6641  594.84  609.18  600.92  606.41  609.18  609.18  609.18  ±0.57%       10
 
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to WebP 47962ms
      name             hz       min       max      mean       p75       p99      p995      p999     rme  samples
    · Sharp        0.6763  1,470.70  1,489.91  1,478.61  1,481.45  1,489.91  1,489.91  1,489.91  ±0.26%       10
-   · ImageScript  0.5849  1,693.34  1,767.95  1,709.70  1,713.08  1,767.95  1,767.95  1,767.95  ±0.92%       10
+   · image-js     0.5849  1,693.34  1,767.95  1,709.70  1,713.08  1,767.95  1,767.95  1,767.95  ±0.92%       10
 
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > decode image 1268ms
      name                 hz     min     max    mean     p75     p99    p995    p999     rme  samples
    · Sharp          1,813.40  0.4845  0.7527  0.5515  0.5586  0.6593  0.6985  0.7527  ±0.32%      907
-   · ImageScript  428,427.19  0.0020  0.2646  0.0023  0.0023  0.0031  0.0061  0.0336  ±0.36%   214214
+   · image-js    428,427.19  0.0020  0.2646  0.0023  0.0023  0.0031  0.0061  0.0336  ±0.36%   214214
 
  ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > clone instance 1228ms
      name                   hz     min     max    mean     p75     p99    p995    p999     rme  samples
-   · ImageScript  4,432,529.89  0.0001  1.7772  0.0002  0.0002  0.0004  0.0006  0.0016  ±1.09%  2216265
+   · image-js    4,432,529.89  0.0001  1.7772  0.0002  0.0002  0.0004  0.0006  0.0016  ±1.09%  2216265
 
  BENCH  Summary
 
   Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > resize
-    1.48x faster than ImageScript
+    1.48x faster than image-js
 
   Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > crop/extract
-    31.00x faster than ImageScript
+    31.00x faster than image-js
 
   Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to JPEG
-    1.87x faster than ImageScript
+    1.87x faster than image-js
 
   Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to WebP
-    1.16x faster than ImageScript
+    1.16x faster than image-js
 
-  ImageScript - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > decode image
+  image-js - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > decode image
     236.26x faster than Sharp
 ```
 
@@ -224,6 +224,6 @@ https://github.com/hananoshikayomaru/sharp-js
 
 ## Acknowledgments
 
-- [ImageScript](https://github.com/matmen/ImageScript) - The underlying pure JavaScript image processing library
+- [image-js](https://github.com/image-js/image-js) - The underlying pure JavaScript image processing library
 - [Sharp](https://github.com/lovell/sharp) - The reference implementation this library aims to be compatible with
 

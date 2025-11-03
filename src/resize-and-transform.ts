@@ -206,7 +206,7 @@ export async function resizeAndTransformImageSizes({
 
     let adjustedDimensions = { ...dimensions };
 
-    // Note: ImageScript doesn't handle EXIF orientation automatically
+    // Note: image-js doesn't handle EXIF orientation automatically
     // We'll keep dimensions as-is
 
     const resizeImageMeta = {
@@ -323,7 +323,7 @@ export async function resizeAndTransformImageSizes({
             }
 
             if (imageResizeConfig.formatOptions) {
-                // ImageScript doesn't support AVIF, use PNG as fallback
+                // image-js doesn't support AVIF, use PNG as fallback
                 const format = imageResizeConfig.formatOptions.format === 'avif' ? 'png' : imageResizeConfig.formatOptions.format;
                 resized = resized.toFormat(
                     format as 'png' | 'jpeg' | 'jpg' | 'webp',
