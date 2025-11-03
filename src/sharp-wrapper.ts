@@ -759,19 +759,56 @@ export class SharpWrapper {
         // Handle extract if specified
         const extractRegion = (this as unknown as { _extractRegion?: Region })._extractRegion;
         if (extractRegion) {
+            // Validate and clamp extract region to image bounds
+            const imgWidth = image.width;
+            const imgHeight = image.height;
+
+            // Clamp coordinates to non-negative values
+            let left = Math.max(0, Math.floor(extractRegion.left));
+            let top = Math.max(0, Math.floor(extractRegion.top));
+
+            // Clamp width and height to positive values and within image bounds
+            let width = Math.max(1, Math.floor(extractRegion.width));
+            let height = Math.max(1, Math.floor(extractRegion.height));
+
+            // Ensure the region doesn't exceed image boundaries
+            if (left + width > imgWidth) {
+                // Adjust width to fit within bounds
+                width = Math.max(1, imgWidth - left);
+            }
+
+            if (top + height > imgHeight) {
+                // Adjust height to fit within bounds
+                height = Math.max(1, imgHeight - top);
+            }
+
+            // Final validation - ensure we have valid dimensions after clamping
+            if (width <= 0 || height <= 0 || left >= imgWidth || top >= imgHeight) {
+                throw new Error(
+                    `Cannot extract region: resulting region is invalid after clamping. ` +
+                    `Requested: left=${extractRegion.left}, top=${extractRegion.top}, width=${extractRegion.width}, height=${extractRegion.height}. ` +
+                    `Clamped: left=${left}, top=${top}, width=${width}, height=${height}. ` +
+                    `Image size: ${imgWidth}x${imgHeight}`
+                );
+            }
+
             try {
                 // image-js crop uses { origin: { row, column }, width, height }
                 // row = top (Y coordinate), column = left (X coordinate)
                 image = crop(image, {
                     origin: {
-                        row: extractRegion.top,
-                        column: extractRegion.left,
+                        row: top,
+                        column: left,
                     },
-                    width: extractRegion.width,
-                    height: extractRegion.height,
+                    width: width,
+                    height: height,
                 });
             } catch (error) {
-                throw new Error(`Failed to extract region: ${error instanceof Error ? error.message : String(error)}`);
+                throw new Error(
+                    `Failed to extract region: ${error instanceof Error ? error.message : String(error)}. ` +
+                    `Region: left=${left}, top=${top}, width=${width}, height=${height}. ` +
+                    `Image size: ${imgWidth}x${imgHeight}`
+                );
             }
             delete (this as unknown as { _extractRegion?: Region })._extractRegion;
         }
