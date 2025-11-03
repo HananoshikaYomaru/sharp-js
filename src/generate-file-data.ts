@@ -1,4 +1,5 @@
-import { SharpWrapper } from './sharp-wrapper.js';
+import type { SharpWrapper } from './sharp-wrapper.js';
+import sharpFactory from './sharp-wrapper.js';
 import fs from 'fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import sanitize from 'sanitize-filename';
@@ -310,8 +311,22 @@ export const generateFileData = async <T>({
 		if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
 			const input = file.tempFilePath ? await fs.readFile(file.tempFilePath) : file.data;
 
-			sharpFile = new SharpWrapper(input, sharpOptions);
-			sharpFile = sharpFile.rotate(); // Auto-orient
+			// Use the passed sharp factory function, or fallback to our factory
+			// Ensure we always get a SharpWrapper instance
+			let sharpInstance: SharpWrapper;
+			if (typeof sharp === 'function') {
+				const result = sharp(input, sharpOptions);
+				// Verify it has metadata method (it should be a SharpWrapper instance)
+				if (result && typeof result.metadata === 'function') {
+					sharpInstance = result;
+				} else {
+					// Fallback if the factory function doesn't return a proper instance
+					sharpInstance = sharpFactory(input, sharpOptions);
+				}
+			} else {
+				sharpInstance = sharpFactory(input, sharpOptions);
+			}
+			sharpFile = sharpInstance.rotate(); // Auto-orient
 
 			if (fileHasAdjustments) {
 				if (resizeOptions) {
@@ -410,7 +425,8 @@ export const generateFileData = async <T>({
 
 			// Apply resize after cropping to ensure it conforms to resizeOptions
 			if (resizeOptions && !resizeOptions.withoutEnlargement) {
-				const wrapper = new SharpWrapper(croppedImage);
+				const sharpInstance = typeof sharp === 'function' ? sharp(croppedImage) : sharpFactory(croppedImage);
+				const wrapper = sharpInstance;
 				const resizedWrapper = await wrapper.resize(resizeOptions);
 				const resizedAfterCrop = await resizedWrapper.toBuffer({ resolveWithObject: true });
 

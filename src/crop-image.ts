@@ -1,4 +1,5 @@
-import { SharpWrapper } from './sharp-wrapper.js';
+import type { SharpWrapper } from './sharp-wrapper.js';
+import sharpFactory from './sharp-wrapper.js';
 import type {
 	CropImageArgs,
 	PayloadRequest,
@@ -43,7 +44,9 @@ export async function cropImage({
 			if (fileIsAnimatedType) {
 				// image-js has limited animated support
 				// For now, we'll treat animated images as single frames
-				const wrapper = new SharpWrapper(file.tempFilePath ? await readFile(file.tempFilePath!) : file.data);
+				const fileData = file.tempFilePath ? await readFile(file.tempFilePath!) : file.data;
+				const sharpInstance = typeof sharp === 'function' ? sharp(fileData) : sharpFactory(fileData);
+				const wrapper = sharpInstance;
 				const animatedMetadata = await wrapper.metadata();
 				adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight;
 			}
@@ -69,7 +72,9 @@ export async function cropImage({
 			? await import('fs/promises').then((fs) => fs.readFile(file.tempFilePath!))
 			: file.data;
 
-		let cropped = new SharpWrapper(input);
+		// Use the passed sharp factory function if available, otherwise use our factory
+		const sharpInstance = typeof sharp === 'function' ? sharp(input) : sharpFactory(input);
+		let cropped = sharpInstance;
 		if (fileIsAnimatedType) {
 			// Note: image-js has limited animated support
 			// This may only process the first frame

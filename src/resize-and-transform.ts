@@ -1,4 +1,5 @@
-import { SharpWrapper } from './sharp-wrapper.js';
+import type { SharpWrapper } from './sharp-wrapper.js';
+import sharpFactory from './sharp-wrapper.js';
 import fs from 'fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import sanitize from 'sanitize-filename';
@@ -200,7 +201,9 @@ export async function resizeAndTransformImageSizes({
         ? await fs.readFile(file!.tempFilePath!)
         : file!.data;
 
-    const sharpBase = new SharpWrapper(input);
+    // Use the passed sharp factory function if available, otherwise use our factory
+    const sharpInstance = typeof sharp === 'function' ? sharp(input) : sharpFactory(input);
+    const sharpBase = sharpInstance;
 
     const originalImageMeta = await sharpBase.metadata();
 

@@ -1,7 +1,44 @@
 import { describe, it, expect } from 'vitest';
 import { loadFixture, runWithSharp, runWithImageJs, compareImageOutputs } from './test-utils.js';
 import sharp from './sharp-wrapper.js';
+import sharpLib from 'sharp';
+
 describe('SharpWrapper', () => {
+
+	it('should return metadata with correct dimensions', async () => {
+		const fixture = await loadFixture('test.png');
+
+		const sharpMetadata = await sharpLib(fixture).metadata();
+		const imageJsMetadata = await sharp(fixture).metadata();
+
+		expect(imageJsMetadata.width).toBe(sharpMetadata.width);
+		expect(imageJsMetadata.height).toBe(sharpMetadata.height);
+		expect(imageJsMetadata.width).toBeGreaterThan(0);
+		expect(imageJsMetadata.height).toBeGreaterThan(0);
+		expect(imageJsMetadata.channels).toBeDefined();
+		expect(imageJsMetadata.hasAlpha).toBeDefined();
+	});
+
+	it('should return metadata for JPEG images', async () => {
+		const fixture = await loadFixture('test.jpeg');
+
+		const sharpMetadata = await sharpLib(fixture).metadata();
+		const imageJsMetadata = await sharp(fixture).metadata();
+
+		expect(imageJsMetadata.width).toBe(sharpMetadata.width);
+		expect(imageJsMetadata.height).toBe(sharpMetadata.height);
+		expect(imageJsMetadata.channels).toBeDefined();
+	});
+
+	it('should return metadata for WebP images', async () => {
+		const fixture = await loadFixture('test.webp');
+
+		const sharpMetadata = await sharpLib(fixture).metadata();
+		const imageJsMetadata = await sharp(fixture).metadata();
+
+		expect(imageJsMetadata.width).toBe(sharpMetadata.width);
+		expect(imageJsMetadata.height).toBe(sharpMetadata.height);
+	});
 
 	it('should resize image to specified dimensions', async () => {
 		const fixture = await loadFixture('test.png');

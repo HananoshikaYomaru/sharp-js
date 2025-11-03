@@ -1,6 +1,6 @@
 {
 	"name": "sharp-js",
-	"version": "1.0.18",
+	"version": "1.0.19",
 	"description": "Sharp-compatible wrapper using image-js",
 	"main": "dist/src/index.js",
 	"module": "dist/src/index.js",
@@ -25,7 +25,7 @@
 	"scripts": {
 		"build": "tsc && ts-add-js-extension --dir=dist",
 		"prepublishOnly": "pnpm build",
-		"test": "vitest",
+		"test": "vitest run",
 		"bench": "vitest bench",
 		"typecheck": "tsc --noEmit",
 		"prepare": "husky",
