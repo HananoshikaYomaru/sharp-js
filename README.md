@@ -29,7 +29,7 @@ yarn add sharp-js
 ### Basic Usage
 
 ```typescript
-import sharp from '@yomaru/sharp-js';
+import sharp from 'sharp-js';
 
 // Resize an image
 const resized = await sharp(inputBuffer)
@@ -50,7 +50,7 @@ const jpeg = await sharp(inputBuffer)
 ### Advanced Usage
 
 ```typescript
-import { cropImage, resizeAndTransformImageSizes, generateFileData } from '@yomaru/sharp-js';
+import { cropImage, resizeAndTransformImageSizes, generateFileData } from 'sharp-js';
 
 // Crop with percentage-based coordinates
 const cropped = await cropImage({
@@ -126,7 +126,7 @@ Compared to Sharp, this library has some limitations:
 The library includes cross-testing utilities to verify compatibility with Sharp:
 
 ```typescript
-import { loadFixture, runWithSharp, runWithImageScript, compareImageOutputs } from '@yomaru/sharp-js/test-utils';
+import { loadFixture, runWithSharp, runWithImageScript, compareImageOutputs } from 'sharp-js/test-utils';
 
 const fixture = await loadFixture('test.png');
 const sharpResult = await runWithSharp(fixture, (sharp) => sharp.resize(200, 200));
