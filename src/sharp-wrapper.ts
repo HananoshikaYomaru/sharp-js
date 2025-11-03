@@ -1,4 +1,5 @@
 import { Image } from 'imagescript';
+import sizeOf from 'image-size';
 import type {
     SharpOptions,
     ResizeOptions,
@@ -8,7 +9,7 @@ import type {
     TrimOptions,
     RotateOptions,
 } from './types.js';
-
+import { readFile } from "fs/promises";
 /**
  * Sharp-compatible wrapper using ImageScript
  */
@@ -27,6 +28,7 @@ export class SharpWrapper {
             (this as unknown as { _filePath?: string })._filePath = input;
         }
     }
+
 
     /**
      * Clone this instance
@@ -57,8 +59,7 @@ export class SharpWrapper {
 
         if (filePath) {
             // Load from file path
-            const fs = await import('fs/promises');
-            buffer = await fs.readFile(filePath);
+            buffer = await readFile(filePath);
         } else if (this.inputBuffer) {
             buffer = this.inputBuffer;
         } else {
@@ -236,10 +237,40 @@ export class SharpWrapper {
 
     /**
      * Get image metadata
+     * Uses image-size library for fast header-only parsing without full decode
      */
     async metadata(): Promise<Metadata> {
-        const image = await this.getImage();
+        // Use image-size library for fast metadata reading (header-only, no full decode)
+        let buffer: Buffer;
+        const filePath = (this as unknown as { _filePath?: string })._filePath;
 
+        if (filePath) {
+            buffer = await readFile(filePath);
+        } else if (this.inputBuffer) {
+            buffer = this.inputBuffer;
+        } else {
+            throw new Error('No input provided');
+        }
+
+        try {
+            // image-size reads dimensions from headers without full decode
+            const dimensions = sizeOf(buffer);
+            if (dimensions.width && dimensions.height) {
+                return {
+                    width: dimensions.width,
+                    height: dimensions.height,
+                    channels: 4, // RGBA
+                    hasAlpha: true,
+                    format: dimensions.type || this.format,
+                };
+            }
+        } catch (error) {
+            // If image-size fails, fallback to ImageScript (should be rare)
+            // This can happen with unsupported formats or corrupted headers
+        }
+
+        // Fallback to ImageScript full decode only if header parsing fails
+        const image = await this.getImage();
         return {
             width: image.width,
             height: image.height,

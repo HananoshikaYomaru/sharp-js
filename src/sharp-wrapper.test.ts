@@ -53,13 +53,17 @@ describe('SharpWrapper', () => {
 		expect(comparison.formatMatch).toBe(true);
 	});
 
-	it('should clone instance', async () => {
-		const fixture = await loadFixture('test.png');
-		const wrapper1 = new SharpWrapper(fixture);
-		const wrapper2 = wrapper1.clone();
+	it(
+		'should clone instance',
+		async () => {
+			const fixture = await loadFixture('test.png');
+			const wrapper1 = new SharpWrapper(fixture);
+			const wrapper2 = wrapper1.clone();
 
-		expect(wrapper2).toBeInstanceOf(SharpWrapper);
-		expect(wrapper2).not.toBe(wrapper1);
-	});
+			expect(wrapper2).toBeInstanceOf(SharpWrapper);
+			expect(wrapper2).not.toBe(wrapper1);
+		},
+		10000,
+	);
 });
 

@@ -21,6 +21,7 @@ import { getImageSize } from './utils/get-image-size.js';
 import { optionallyAppendMetadata } from './utils/optionally-append-metadata.js';
 import { cropImage } from './crop-image.js';
 import { resizeAndTransformImageSizes } from './resize-and-transform.js';
+import { fileExists } from './utils/file-exists.js';
 
 type Args<T> = {
 	collection: { config: Collection['config'] };
@@ -134,7 +135,7 @@ const getSafeFileName = async (args: {
 	staticPath: string;
 }): Promise<string> => {
 	const { desiredFilename, staticPath } = args;
-	const { fileExists } = await import('./utils/file-exists.js');
+
 
 	let counter = 0;
 	let fsSafeName = desiredFilename;
@@ -495,10 +496,10 @@ export const generateFileData = async <T>({
 				dimensions: !cropData
 					? dimensions!
 					: {
-							...dimensions,
-							height: fileData.height!,
-							width: fileData.width!,
-						},
+						...dimensions,
+						height: fileData.height!,
+						width: fileData.width!,
+					},
 				file: fileForResize,
 				mimeType: fileData.mimeType!,
 				req,

@@ -16,22 +16,12 @@ A Sharp-compatible pure JavaScript image processing library using [ImageScript](
 
 ## Installation
 
-### From npm
 ```bash
 npm install sharp-js
 # or
 pnpm add sharp-js
 # or
 yarn add sharp-js
-```
-
-### From GitHub Packages
-```bash
-npm install @yomaru/sharp-js
-# or
-pnpm add @yomaru/sharp-js
-# or
-yarn add @yomaru/sharp-js
 ```
 
 ## Usage
@@ -171,6 +161,57 @@ The test suite includes:
 
 ```bash
 pnpm test
+```
+
+
+### Benchmarks
+
+```
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > resize 9978ms
+     name             hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · Sharp        3.7496  264.06  273.31  266.69  267.30  273.31  273.31  273.31  ±0.72%       10
+   · ImageScript  2.5337  391.67  397.87  394.69  396.13  397.87  397.87  397.87  ±0.34%       10
+
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > crop/extract 5985ms
+     name              hz      min      max     mean      p75      p99     p995     p999     rme  samples
+   · Sharp        86.8452  11.2835  11.8265  11.5147  11.5745  11.8265  11.8265  11.8265  ±0.32%       44
+   · ImageScript   2.8017   352.80   359.75   356.92   358.74   359.75   359.75   359.75  ±0.40%       10
+
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to JPEG 13819ms
+     name             hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · Sharp        3.1068  313.74  336.65  321.88  324.58  336.65  336.65  336.65  ±1.42%       10
+   · ImageScript  1.6641  594.84  609.18  600.92  606.41  609.18  609.18  609.18  ±0.57%       10
+
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to WebP 47962ms
+     name             hz       min       max      mean       p75       p99      p995      p999     rme  samples
+   · Sharp        0.6763  1,470.70  1,489.91  1,478.61  1,481.45  1,489.91  1,489.91  1,489.91  ±0.26%       10
+   · ImageScript  0.5849  1,693.34  1,767.95  1,709.70  1,713.08  1,767.95  1,767.95  1,767.95  ±0.92%       10
+
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > decode image 1268ms
+     name                 hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · Sharp          1,813.40  0.4845  0.7527  0.5515  0.5586  0.6593  0.6985  0.7527  ±0.32%      907
+   · ImageScript  428,427.19  0.0020  0.2646  0.0023  0.0023  0.0031  0.0061  0.0336  ±0.36%   214214
+
+ ✓ src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > clone instance 1228ms
+     name                   hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · ImageScript  4,432,529.89  0.0001  1.7772  0.0002  0.0002  0.0004  0.0006  0.0016  ±1.09%  2216265
+
+ BENCH  Summary
+
+  Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > resize
+    1.48x faster than ImageScript
+
+  Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > crop/extract
+    31.00x faster than ImageScript
+
+  Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to JPEG
+    1.87x faster than ImageScript
+
+  Sharp - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > format conversion to WebP
+    1.16x faster than ImageScript
+
+  ImageScript - src/sharp-wrapper.bench.ts > SharpWrapper Performance Benchmarks > decode image
+    236.26x faster than Sharp
 ```
 
 ## License

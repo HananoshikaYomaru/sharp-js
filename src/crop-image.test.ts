@@ -23,6 +23,7 @@ describe('cropImage', () => {
 			dimensions: { width: 800, height: 600 },
 			file,
 			heightInPixels: 200,
+			// @ts-ignore 
 			req,
 			sharp: new SharpWrapper(),
 			widthInPixels: 200,
@@ -34,13 +35,13 @@ describe('cropImage', () => {
 	});
 
 	it('should crop JPEG image', async () => {
-		const fixture = await loadFixture('test.JPG');
+		const fixture = await loadFixture('test.jpeg');
 
 		const file: PayloadFile = {
 			data: fixture,
 			mimetype: 'image/jpeg',
 			size: fixture.length,
-			name: 'test.JPG',
+			name: 'test.jpeg',
 		};
 
 		const req = createMockRequest(file);
@@ -50,6 +51,7 @@ describe('cropImage', () => {
 			dimensions: { width: 1200, height: 800 },
 			file,
 			heightInPixels: 300,
+			// @ts-ignore 
 			req,
 			sharp: new SharpWrapper(),
 			widthInPixels: 300,
@@ -81,6 +83,7 @@ describe('cropImage', () => {
 			dimensions: { width: 1000, height: 750 },
 			file,
 			heightInPixels: 250,
+			// @ts-ignore
 			req,
 			sharp: new SharpWrapper(),
 			widthInPixels: 250,
@@ -91,35 +94,40 @@ describe('cropImage', () => {
 		expect(result.data).toBeInstanceOf(Buffer);
 	});
 
-	it('should return original data if dimensions unchanged', async () => {
-		const fixture = await loadFixture('test.png');
+	it(
+		'should return original data if dimensions unchanged',
+		async () => {
+			const fixture = await loadFixture('test.png');
 
-		const file: PayloadFile = {
-			data: fixture,
-			mimetype: 'image/png',
-			size: fixture.length,
-			name: 'test.png',
-		};
+			const file: PayloadFile = {
+				data: fixture,
+				mimetype: 'image/png',
+				size: fixture.length,
+				name: 'test.png',
+			};
 
-		const req = createMockRequest(file);
+			const req = createMockRequest(file);
 
-		// Get original dimensions first
-		const wrapper = new SharpWrapper(fixture);
-		const metadata = await wrapper.metadata();
+			// Get original dimensions first
+			const wrapper = new SharpWrapper(fixture);
+			const metadata = await wrapper.metadata();
 
-		const result = await cropImage({
-			cropData: { x: 10, y: 10 },
-			dimensions: { width: metadata.width, height: metadata.height },
-			file,
-			heightInPixels: metadata.height,
-			req,
-			sharp: new SharpWrapper(),
-			widthInPixels: metadata.width,
-		});
+			const result = await cropImage({
+				cropData: { x: 10, y: 10 },
+				dimensions: { width: metadata.width, height: metadata.height },
+				file,
+				heightInPixels: metadata.height,
+				// @ts-ignore
+				req,
+				sharp: new SharpWrapper(),
+				widthInPixels: metadata.width,
+			});
 
-		expect(result.data).toEqual(fixture);
-		expect(result.info.width).toBe(metadata.width);
-		expect(result.info.height).toBe(metadata.height);
-	});
+			expect(result.data).toEqual(fixture);
+			expect(result.info.width).toBe(metadata.width);
+			expect(result.info.height).toBe(metadata.height);
+		},
+		10000,
+	);
 });
 

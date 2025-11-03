@@ -9,6 +9,7 @@ import type {
 } from './types.js';
 import { percentToPixel } from './utils/percent-to-pixel.js';
 import { optionallyAppendMetadata } from './utils/optionally-append-metadata.js';
+import { readFile } from "fs/promises";
 
 /**
  * Crop image based on crop data and dimensions
@@ -25,7 +26,10 @@ export async function cropImage({
 }: CropImageArgs): Promise<{ data: Buffer; info: { height: number; size: number; width: number } }> {
 	try {
 		const { x, y } = cropData!;
-		const file = fileArg!;
+		if (!fileArg) {
+			throw new Error('File is required for crop operation');
+		}
+		const file = fileArg;
 		const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype);
 
 		const { height: originalHeight, width: originalWidth } = dimensions;
@@ -39,7 +43,7 @@ export async function cropImage({
 			if (fileIsAnimatedType) {
 				// ImageScript has limited animated support
 				// For now, we'll treat animated images as single frames
-				const wrapper = new SharpWrapper(file.tempFilePath ? await import('fs/promises').then((fs) => fs.readFile(file.tempFilePath!)) : file.data);
+				const wrapper = new SharpWrapper(file.tempFilePath ? await readFile(file.tempFilePath!) : file.data);
 				const animatedMetadata = await wrapper.metadata();
 				adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight;
 			}

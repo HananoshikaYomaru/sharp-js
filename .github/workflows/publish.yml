@@ -12,22 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js for npm
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
-
-      - name: Setup Node.js for GitHub Packages
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@yomaru"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -37,29 +29,11 @@ jobs:
             - recursive: true
               args: [--frozen-lockfile, --strict-peer-dependencies]
             - args: [--global, typescript]
-        env:
-          # we cannot use GITHUB_TOKEN here because we try to access company resources which is outside the scope of this repo
-          # this must be a classic token with read:packages and write:packages permissions
-          GITHUB_TOKEN: ${{ secrets.ALL_2 }}
 
       - name: Build
         run: pnpm build
 
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --registry=https://registry.npmjs.org/
+        run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        continue-on-error: true
-
-      - name: Publish to GitHub Packages
-        # For GitHub Packages, we need to publish with a temporary scoped name
-        run: |
-          # Temporarily rename package for GitHub Packages
-          npm pkg set name="@yomaru/sharp-js"
-          pnpm publish --no-git-checks --registry=https://npm.pkg.github.com
-          # Restore original name
-          npm pkg set name="sharp-js"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.ALL_2 }}
-        continue-on-error: true
